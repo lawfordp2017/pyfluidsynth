@@ -845,13 +845,16 @@ def fluid_synth_write_stereo(synth, nframes, dtype='int16'):
         buf = create_string_buffer(nframes * 4)
         _fl.fluid_synth_write_s16(synth, nframes, buf, 0, 2, buf, 1, 2)
     elif dtype == 'float' or (numpy and dtype == numpy.float):
-        buf = c_float * (nframes * 2)
+        buf = ( c_float * (nframes * 2) )()
         _fl.fluid_synth_write_float(synth, nframes, buf, 0, 2, buf, 1, 2)
     else:
         raise ValueError("Data type '%s' not supported. Is NumPy installed?" % dtype)
 
     if dtype and numpy:
-        return numpy.frombuffer(buf[:], dtype=dtype)
+        if dtype == 'float' or (numpy and dtype == numpy.float):
+            return numpy.ndarray(nframes*2,'f',buf,order='C')
+        else:
+            return numpy.frombuffer(buf[:], dtype=dtype)
     else:
         return buf
 
